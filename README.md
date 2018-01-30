@@ -20,7 +20,7 @@ python3 qc.py
  * [Python](https://www.python.org/) >=3.5 (this is required QISKit)
  * [wxPython](https://www.wxpython.org/) >=4.0?
 
-###git
+### git
 
  * [qiskit-sdk-py](https://github.com/QISKit/qiskit-sdk-py)
  * [wxPython Project Phoenix](https://github.com/wxWidgets/Phoenix)
