@@ -1,0 +1,5 @@
+# confingure 
+default.conf
+
+# python cache
+/__pycache__/
