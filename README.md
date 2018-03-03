@@ -5,7 +5,7 @@ Quantum Calculator with QISKit.
 
 ## Overview
 
-It is possible to add a natural number (0 to 7) expressed by 3 qbit.  Since the result also needs to be represented by 3 qbit, if it is more than 7 it will be Over Range (OR). The H button means that the Hadamard gate acts on the input gate, at that time the input gate simultaneously shows the state of (0 to 7), which enables quantum parallel computation.
+It is possible to add a natural number expressed by n Qubits.  Since the result also needs to be represented by n Qubits, if it is more than n Qubits it will be Over Range (OR). The H button means that the Hadamard gate acts on the input gate, at that time the input gate simultaneously shows the state of (0, 1, 2, ... , 2^n-1), which enables quantum parallel computation.
 
 ## Usage
 
@@ -13,9 +13,12 @@ It is possible to add a natural number (0 to 7) expressed by 3 qbit.  Since the 
 python3 qc.py
 ```
 
-**In order to calculate on IBM Q quantum device, it is necessary to set API token. Please edit Qconfig.py.**
+In order to calculate on IBM Q quantum device, it is necessary to set API token. Please edit Qconfig.py.
+
+**Execution on the real device is possible by preparing Qconfig.py, but any operation using this program can not be guaranteed Please check it well before execution.**
 
 ## Requirement
+
  * [QISKit](https://www.qiskit.org/) >=0.4.7
  * [Python](https://www.python.org/) >=3.5 (this is required QISKit)
  * [wxPython](https://www.wxpython.org/) >=4.0?
@@ -26,18 +29,18 @@ python3 qc.py
  * [wxPython Project Phoenix](https://github.com/wxWidgets/Phoenix)
 
 ## How it works
-
-In order to add up, this program requires a 10 qbit quantum circuit. The breakdown of each bit is input register 3qbit + 3qbit and output register 3qbit + 1qbit(OR). The quantum algorithm of this addition was prepared with reference to [Qiita @converghub
- article](https://qiita.com/converghub/items/c61b2b91b311cf730e18).
-As of January 2017, there are no real quantum devices available to create and use the gate with free arrangement from QISKit. Therefore, it is currently operating on the simulator.
+In order to add or subtract, this program requires  2*n+1 Qubits quantum circuit where n is number of input qubits. The quantum algorithm of this adder was prepared with reference to  [quantum ripple-carry adder from Cuccaro et al, quant-ph/0410184](https://arxiv.org/abs/quant-ph/0410184).
 
 ## Referece
 
  *  [Qiita, @converghub, 量子コンピュータ（シミュレータ）でモジュール化可能な加算器を作る](https://qiita.com/converghub/items/c61b2b91b311cf730e18)
 
+ *  [Quantum ripple-carry adder from Cuccaro et al, quant-ph/0410184](https://arxiv.org/abs/quant-ph/0410184)
+
 ## Version History
 
- * 2017/1/28 v0.0.1 **3qbit + 3qbit = 3qbit addition supports.**
+ * 2018/03/03  v0.0.2 **n Qubits + n Qubits = n Qubits addition and subtract support.** 
+ * 2017/01/28 v0.0.1 **3 Qubits + 3 Qubits = 3 Qubits addition supports.**
 
 ## Author
 
