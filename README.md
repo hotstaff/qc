@@ -29,7 +29,7 @@ In order to calculate on IBM Q quantum device, it is necessary to set API token.
  * [wxPython Project Phoenix](https://github.com/wxWidgets/Phoenix)
 
 ## How it works
-In order to add or subtract, this program requires  2*n+1 Qubits quantum circuit where n is number of input qubits. The quantum algorithm of this adder was prepared with reference to  [quantum ripple-carry adder from Cuccaro et al, quant-ph/0410184](https://arxiv.org/abs/quant-ph/0410184).
+In order to add or subtract, this program requires  2*n+2 Qubits quantum circuit where n is number of input qubits. The quantum algorithm of this adder was prepared with reference to  [quantum ripple-carry adder from Cuccaro et al, quant-ph/0410184](https://arxiv.org/abs/quant-ph/0410184).
 
 ## Referece
 
