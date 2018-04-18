@@ -5,9 +5,7 @@
 # Licence: Apache License 2.0
 
 from wx import App
-from interface import Calculator, Menu, TextPanel
-        
-##########################################################################
+from interface import Calculator
 
 if __name__ == '__main__':
 
@@ -15,5 +13,3 @@ if __name__ == '__main__':
     frame = Calculator()
     frame.Show()
     application.MainLoop()
-
-
