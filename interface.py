@@ -1,40 +1,44 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Quantum Calculator User Interface Module
-# Author: Hideto Manjo
-# Licence: Apache License 2.0
+'''
+Quantum Calculator User Interface Module
+Author: Hideto Manjo
+Licence: Apache License 2.0
+'''
 
 import sys
-
-import wx
 import time
 import threading
-
 import os
 import configparser
+import wx
 
 from libqc import QC
 
-version_text = '0.0.2'
-config_filename = './default.conf'
+VERSION_TEXT = '0.0.2'
+CONFIG_FILENAME = './default.conf'
 
 # default configure load
-conf = configparser.ConfigParser()
-if(os.path.isfile(config_filename) is False):
-    sys.stdout.write('{0} not found -> init\n'.format(config_filename))
-    conf['DEFAULT'] = {
-                'backend': 'local_qasm_simulator',
-                'remote': 'no',
-                'qubits': '3',
-                'qubits_max': '8',
-                'qubits_min': '1'
+CONF = configparser.ConfigParser()
+if os.path.isfile(CONFIG_FILENAME) is False:
+    sys.stdout.write('{0} not found -> init\n'.format(CONFIG_FILENAME))
+    CONF['DEFAULT'] = {
+        'backend': 'local_qasm_simulator',
+        'remote': 'no',
+        'qubits': '3',
+        'qubits_max': '8',
+        'qubits_min': '1'
         }
-    with open(config_filename, 'w') as fp:
-        conf.write(fp)
-conf.read(config_filename)
+    with open(CONFIG_FILENAME, 'w') as fp:
+        CONF.write(fp)
+CONF.read(CONFIG_FILENAME)
 
 
 class Calculator(wx.Frame):
+    '''
+    Calculator Frame
+    '''
+    # pylint: disable=too-many-ancestors
 
     def __init__(self):
         super(Calculator, self).__init__(None,
@@ -45,10 +49,10 @@ class Calculator(wx.Frame):
                                                 wx.RESIZE_BORDER ^
                                                 wx.MAXIMIZE_BOX))
 
-        self.qc = QC(backend=conf['DEFAULT'].get('backend',
-                                                 'local_qasm_simulator'),
-                     remote=conf['DEFAULT'].getboolean('remote'),
-                     qubits=conf['DEFAULT'].getint('qubits', 3))
+        self.__qc = QC(backend=CONF['DEFAULT'].get('backend',
+                                                   'local_qasm_simulator'),
+                       remote=CONF['DEFAULT'].getboolean('remote'),
+                       qubits=CONF['DEFAULT'].getint('qubits', 3))
 
         # flags
         self.busy = False
@@ -77,60 +81,77 @@ class Calculator(wx.Frame):
         root_panel.SetSizer(root_layout)
         root_layout.Fit(root_panel)
 
-        self.Bind(wx.EVT_MENU, self.selectMenu)
+        self.Bind(wx.EVT_MENU, self.select_menu)
 
     # BIND FUNCTION
-    def selectMenu(self, event):
+    def select_menu(self, event):
+        '''
+        select_menu
+        '''
         menuid = event.GetId()
-        if (menuid == 1):
+        if menuid == 1:
             self.Close(True)
-        elif(menuid >= 2000 and menuid < 3000):
-            self.setBackend(self.menu.id2backend[menuid])
-        elif(menuid > 4000 and menuid < 5000):
+        elif menuid >= 2000 and menuid < 3000:
+            self.set_backend(self.menu.id2backend[menuid])
+        elif menuid > 4000 and menuid < 5000:
             qubits = int(menuid - 4000)
-            self.qc.setConfig({'qubits': qubits})
+            self.__qc.set_config({'qubits': qubits})
             self.SetStatusText('Set Qubit -> {0} (0-{1}),'
                                ' circuit requires {2} qubits at least.'
                                .format(qubits, 2**qubits - 1, qubits * 2 + 2))
-            self.calcbutton_panel._check_calctext()
-        elif(menuid == 29):
+            self.calcbutton_panel.check_calctext()
+        elif menuid == 29:
             self.SetStatusText('Loading remote backend')
             self.menu.reload_backend_menu(remote=True)
             self.SetStatusText('Updated')
-        elif(menuid == 31):
-            self.changeBase('dec')
-        elif(menuid == 32):
-            self.changeBase('bin')
-        elif(menuid == 9):
+        elif menuid == 31:
+            self.change_base('dec')
+        elif menuid == 32:
+            self.change_base('bin')
+        elif menuid == 9:
             box = wx.MessageDialog(None,
                                    'Quantum Calculator v{}\n\n'
                                    'https://github.com/hotstaff/qc\n'
                                    'Apache Licence 2.0\n'
                                    '© 2017 Hideto Manjo'
-                                   .format(version_text),
+                                   .format(VERSION_TEXT),
                                    'About Quantum Calculator',
                                    wx.OK | wx.ICON_NONE | wx.STAY_ON_TOP)
             box.ShowModal()
             box.Destroy()
     # BIND FUNCTION END
+    def get_qc(self):
+        '''
+        return quantum calcurator
+        '''
+        return self.__qc
 
-    def setBackend(self, backend):
+    def set_backend(self, backend):
+        '''
+        set_backend
+        '''
         self.SetStatusText('Loading {}...'.format(backend))
-        self.qc.setConfig({'backend': backend})
-        if (self.qc.load()):
+        self.__qc.set_config({'backend': backend})
+        if self.__qc.load():
             self.SetStatusText('Ready to use {}'.format(backend))
         else:
             self.SetStatusText('{} is busy'.format(backend))
 
-    def changeBase(self, base='dec'):
+    def change_base(self, base='dec'):
+        '''
+        change_base
+        '''
         self.text_panel.calc_text.Clear()
         self.base = base
-        self.changeButtonVisible()
+        self.change_button_visible()
         self.SetStatusText('Set input mode to {}'
                            .format('Binary' if base == 'bin' else 'Decimal'))
 
-    def changeButtonVisible(self):
-        if (self.base == 'bin'):
+    def change_button_visible(self):
+        '''
+        change button visible
+        '''
+        if self.base == 'bin':
             self.calcbutton_panel.button['0'].Enable()
             self.calcbutton_panel.button['1'].Enable()
             for i in range(2, 10):
@@ -141,12 +162,17 @@ class Calculator(wx.Frame):
 
 
 class Menu(wx.MenuBar):
+    '''
+    Menu
+    '''
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, frame):
 
         super(Menu, self).__init__(wx.ID_ANY)
 
         self.frame = frame
+        self.__qc = self.frame.get_qc()
 
         menu_view = wx.Menu()
         menu_view.AppendRadioItem(31, 'Decimal')
@@ -159,12 +185,12 @@ class Menu(wx.MenuBar):
         self.menu_backend.Append(29, 'Import Qconfig.py')
 
         menu_circuit = wx.Menu()
-        qubits_max = conf['DEFAULT'].getint('qubits_max', 8)
-        qubits_min = conf['DEFAULT'].getint('qubits_min', 1)
+        qubits_max = CONF['DEFAULT'].getint('qubits_max', 8)
+        qubits_min = CONF['DEFAULT'].getint('qubits_min', 1)
         for i in range(qubits_min, qubits_max + 1):
-            menu_circuit.AppendRadioItem(4000 + i,  str(i))
+            menu_circuit.AppendRadioItem(4000 + i, str(i))
 
-        menu_circuit.Check(4000 + int(self.frame.qc.qubits), True)
+        menu_circuit.Check(4000 + int(self.__qc.qubits), True)
 
         menu_help = wx.Menu()
         menu_help.Append(9, 'About')
@@ -175,14 +201,16 @@ class Menu(wx.MenuBar):
         self.Append(menu_help, 'Help')
 
     def reload_backend_menu(self, remote=False):
-        # menu initialize
+        '''
+        reload backend menu
+        '''
         for ident in self.id2backend:
             self.menu_backend.Delete(ident)
 
-        if (remote is True):
-            self.frame.qc.setConfig({'remote': True})
-            self.frame.qc.load()
-        backends = self.frame.qc.backends
+        if remote is True:
+            self.__qc.set_config({'remote': True})
+            self.__qc.load()
+        backends = self.__qc.backends
 
         disable_backends = [
             'local_unitary_simulator',
@@ -193,17 +221,17 @@ class Menu(wx.MenuBar):
         # disable
         for backend in backends[:]:
             for disable_backend in disable_backends:
-                if (backend == disable_backend):
+                if backend == disable_backend:
                     backends.pop(backends.index(backend))
                     disable_backends.pop(disable_backends.index(backend))
 
         for i, backend in enumerate(backends):
             menuid = 2000 + i
 
-            if ('local' in backend):
+            if 'local' in backend:
                 menutitle = 'Local ({})'.format(backend)
-            elif ('ibmqx' in backend):
-                if ('simulator' in backend):
+            elif 'ibmqx' in backend:
+                if 'simulator' in backend:
                     menutitle = 'IBM Q - Simulator ({})'.format(backend)
                 else:
                     menutitle = 'IBM Q - Real device ({})'.format(backend)
@@ -211,7 +239,7 @@ class Menu(wx.MenuBar):
                 menutitle = 'Remote ({})'.format(backend)
             self.menu_backend.InsertRadioItem(i, menuid, menutitle)
 
-            if (backend == self.frame.qc.backend):
+            if backend == self.__qc.backend:
                 self.menu_backend.Check(menuid, True)
 
             self.id2backend[2000 + i] = backend
@@ -219,6 +247,10 @@ class Menu(wx.MenuBar):
 
 
 class TextPanel(wx.Panel):
+    '''
+    TextPanel
+    '''
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, parent):
         super(TextPanel, self).__init__(parent, wx.ID_ANY)
@@ -237,13 +269,16 @@ class TextPanel(wx.Panel):
 
 
 class CalcButtonPanel(wx.Panel):
+    '''
+    CalcButtonPanel
+    '''
 
     def __init__(self, parent):
         super(CalcButtonPanel, self).__init__(parent, wx.ID_ANY)
 
         # frame property
         self.frame = parent.GetParent()
-        self.qc = self.frame.qc
+        self.__qc = self.frame.get_qc()
         self.calc_text = self.frame.text_panel.calc_text
 
         # (label, buttonid, display)
@@ -270,7 +305,7 @@ class CalcButtonPanel(wx.Panel):
         self.button = {}
         self.buttonid2label = {}
         for (label, buttonid, display) in button_collection:
-            if (buttonid == 401):
+            if buttonid == 401:
                 self.button[label] = wx.Button(self,
                                                buttonid,
                                                '',
@@ -294,56 +329,66 @@ class CalcButtonPanel(wx.Panel):
         # bind button event
         for i in range(10):
             self.Bind(wx.EVT_BUTTON,
-                      self.click_num_button,
+                      self._click_num_button,
                       self.button[str(i)])
 
-        self.Bind(wx.EVT_BUTTON, self.click_num_button, self.button['H'])
+        self.Bind(wx.EVT_BUTTON, self._click_num_button, self.button['H'])
 
-        self.Bind(wx.EVT_BUTTON, self.click_CE_button, self.button['CE'])
-        self.Bind(wx.EVT_BUTTON, self.click_OPE_button, self.button['+'])
-        self.Bind(wx.EVT_BUTTON, self.click_OPE_button, self.button['-'])
-        self.Bind(wx.EVT_BUTTON, self.click_E_button, self.button['='])
+        self.Bind(wx.EVT_BUTTON, self._click_ce_button, self.button['CE'])
+        self.Bind(wx.EVT_BUTTON, self._click_ope_button, self.button['+'])
+        self.Bind(wx.EVT_BUTTON, self._click_ope_button, self.button['-'])
+        self.Bind(wx.EVT_BUTTON, self._click_e_button, self.button['='])
 
-    # BIND FUNCTIONS
-    def click_num_button(self, event):
-        if (self.frame.busy):
-            return False
-        if (self.frame.init):
-            self.calc_text.Clear()
-            self.frame.init = False
-        (label, display) = self.buttonid2label[str(event.GetId())]
-        self.calc_text.AppendText(display)
-        self._check_calctext()
-
-    def click_OPE_button(self, event):
-        self.click_num_button(event)
-
-    def click_CE_button(self, event):
-        if (self.frame.busy):
-            return False
-        self.button['='].Disable()
-        self.calc_text.Clear()
-        self.frame.SetStatusText('Clear')
-
-    def click_E_button(self, event):
-        if (self.frame.busy is False and self.frame.init is False):
-            self._calc()
-    # BIND FUNCTIONS END
-
-    def _showAlart(self, title, text, style=wx.OK):
+    @staticmethod
+    def show_alart(title, text):
+        '''
+        show_alart
+        '''
         width = 128
-        if(len(text) > width):
-            v = [text[i: i+width] for i in range(0, len(text), width)]
-            text = "\n".join(v)
+        if len(text) > width:
+            split_text = [text[i: i+width] for i in range(0, len(text), width)]
+            text = "\n".join(split_text)
         dialog = wx.MessageDialog(None, text, title, style=wx.ICON_NONE)
         dialog.ShowModal()
         dialog.Destroy()
 
-    def _check_calctext(self):
+    # BIND FUNCTIONS
+    def _click_num_button(self, event):
+        if self.frame.busy:
+            return False
+        if self.frame.init:
+            self.calc_text.Clear()
+            self.frame.init = False
+        display = self.buttonid2label[str(event.GetId())][1]
+        self.calc_text.AppendText(display)
+        self.check_calctext()
+        return True
+
+    def _click_ope_button(self, event):
+        self._click_num_button(event)
+
+    def _click_ce_button(self, _event):
+        if self.frame.busy:
+            return False
+        self.button['='].Disable()
+        self.calc_text.Clear()
+        self.frame.SetStatusText('Clear')
+        return True
+
+    def _click_e_button(self, _event):
+        if self.frame.busy is False and self.frame.init is False:
+            self._calc()
+    # BIND FUNCTIONS END
+
+    def check_calctext(self):
+        '''
+        check calctext
+        '''
         calc_string = str(self.calc_text.GetValue())
         self.button['='].Disable()
-        if(self.frame.busy is False):
-            if (len(self.qc.getSeq(calc_string, self.frame.base)) != 0):
+        if self.frame.busy is False:
+            seq = self.__qc.get_seq(calc_string, self.frame.base)
+            if seq:
                 self.button['='].Enable()
 
     def _calc(self):
@@ -352,37 +397,37 @@ class CalcButtonPanel(wx.Panel):
         self.button['='].Disable()
 
         # exec and draw job status
-        qc_result = self.qc.execCalc(str(self.calc_text.GetValue()),
-                                     self.frame.base)
+        qc_result = self.__qc.exec_calc(str(self.calc_text.GetValue()),
+                                        self.frame.base)
         self._draw(qc_result)
 
         # init flag reset
         self.frame.init = True
 
         # wait for result of qc
-        wait_th = threading.Thread(name='wait_th', target=self._waitAnser)
+        wait_th = threading.Thread(name='wait_th', target=self._wait_anser)
         wait_th.start()
 
-    '''
-    thread
-        GUI functions require that are called on main thread,
-         so use wx.CallAfter as caller function.
-    '''
     def _draw(self, qc_result):
+        '''
+        thread
+            GUI functions require that are called on main thread,
+            so use wx.CallAfter as caller function.
+        '''
         [status, ans] = qc_result
         wx.CallAfter(self.frame.SetStatusText, str(status))
-        if(ans is not None and len(ans) > 15):
-            wx.CallAfter(self. _showAlart, 'Anser', str(ans), style=wx.OK)
+        if ans is not None and len(ans) > 15:
+            wx.CallAfter(self.show_alart, 'Anser', str(ans))
         wx.CallAfter(self.calc_text.SetValue, str(ans))
 
-    def _waitAnser(self):
-        while(True):
+    def _wait_anser(self):
+        while True:
             time.sleep(0.5)
             wx.CallAfter(self.frame.SetStatusText,
                          'Phase {0} {1}'
-                         .format(self.qc.phase[-1][0], self.qc.phase[-1][1]))
-            if(self.qc.wait is False):
-                self._draw(self.qc.last)
+                         .format(self.__qc.phase[-1][0], self.__qc.phase[-1][1]))
+            if self.__qc.wait is False:
+                self._draw(self.__qc.last)
                 wx.CallAfter(self.button['='].Enable)
                 self.frame.busy = False
                 break
