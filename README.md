@@ -3,6 +3,13 @@
 
 Quantum Calculator with QISKit.
 
+## Note
+
+**At this time, the program no longer works properly due to specification changes of QISkit.**
+
+There are plans to correspond current specification soon.
+
+
 ## Overview
 
 It is possible to add a natural number expressed by n Qubits.  Since the result also needs to be represented by n Qubits, if it is more than n Qubits it will be Over Range (OR). The H button means that the Hadamard gate acts on the input gate, at that time the input gate simultaneously shows the state of (0, 1, 2, ... , 2^n-1), which enables quantum parallel computation.
